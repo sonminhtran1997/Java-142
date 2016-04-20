@@ -198,6 +198,17 @@ public class HotelBookerFrame extends JFrame {
                         {
                             dayButton[i][j].setEnabled(true);
                         }
+                        else if((monthComboBox.getSelectedIndex() + 1) == today.getMonth())
+                        {
+                            if (cal.at(i, j) < today.getDayOfMonth()) 
+                            {
+                                dayButton[i][j].setEnabled(false);
+                            }
+                        }
+                        else
+                        {
+                            dayButton[i][j].setEnabled(false);
+                        }
                         dayButton[i][j].setText(Integer.toString(cal.at(i, j)));
                     }
                 }
