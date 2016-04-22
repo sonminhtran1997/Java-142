@@ -88,12 +88,15 @@ public class HotelBookerFrame extends JFrame {
                 
                 if (!(cal.at(i, j) <= 0)) {
                     dayButton[i][j].setText(String.valueOf(cal.at(i, j)));
+                    dayButton[i][j].setForeground(Color.BLACK);
                     if (cal.at(i, j) < today.getDayOfMonth()) {
-                        dayButton[i][j].setEnabled(false);
-                    } else {
-                    }
-                } else {
-                    dayButton[i][j].setEnabled(false);
+                        dayButton[i][j].setForeground(Color.GRAY);
+                    } 
+                    else {}
+                } 
+                else 
+                {
+                    dayButton[i][j].setText(null);
                 }
                 dayButton[i][j].addActionListener(listener);
                 buttonPanel.add(dayButton[i][j]);
@@ -172,108 +175,106 @@ public class HotelBookerFrame extends JFrame {
                 for (int j = 0; j < 7; j++) {
                     if (event.getSource() == dayButton[i][j])
                     {
-                        dateSelected = Short.parseShort(dayButton[i][j].getText());
-                        buttonArrayListener(event);
+                        try
+                        {
+                            dateSelected = Short.parseShort(dayButton[i][j].getText());
+                            buttonArrayListener(event);
+                        }
+                        catch(NumberFormatException exception)
+                        {}
                         
                     }
                 }
             }
 
         }
-
+        int previousMonthChoice = today.getMonth();
         public void monthComboBoxActionPerformed(ActionEvent event) {
             int month;
             int year;
+            if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) {
+                if ((monthComboBox.getSelectedIndex() + 1) <= today.getMonth()) 
+                {
+                    monthComboBox.setSelectedIndex(previousMonthChoice);
+                }
+            }
             month = monthComboBox.getSelectedIndex();
             year = Integer.parseInt(yearsComboBox.getSelectedItem().toString());
             cal = new BasicCalendar(month, year);
+            
             for (int i = 0; i < 6; i++) {
                 for (int j = 0; j < 7; j++) 
                 {
-                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) > today.getYear()) 
-                    {
-                        dayButton[i][j].setEnabled(true);
-                    } 
                     if (cal.at(i, j) <= 0) 
                     {
                         dayButton[i][j].setText(null);
-                        dayButton[i][j].setEnabled(false);
-                    } 
-                    else {
-                        if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) > today.getYear()) 
-                        {
-                            dayButton[i][j].setEnabled(true);
-                        } 
-                        else
-                        {
-                            if ((monthComboBox.getSelectedIndex() + 1) > today.getMonth()) {
-                                dayButton[i][j].setEnabled(true);
-                            } 
-                            else if ((monthComboBox.getSelectedIndex() + 1) == today.getMonth()) 
-                            {
-                                if (cal.at(i, j) < today.getDayOfMonth()) 
-                                {
-                                    dayButton[i][j].setEnabled(false);
-                                }
-                            } 
-                            else 
-                            {
-                                dayButton[i][j].setEnabled(false);
-                            }
-                        }
+                    }
+                    else
+                    {
                         dayButton[i][j].setText(Integer.toString(cal.at(i, j)));
+                        dayButton[i][j].setForeground(Color.BLACK);
                     }
                 }
             }
-
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) 
+                    {
+                        if (monthComboBox.getSelectedIndex() == (today.getMonth())) {
+                            if (cal.at(i, j) < today.getDayOfMonth()) {
+                                dayButton[i][j].setForeground(Color.GRAY);
+                            }
+                        }
+                    }
+                }
+            }
+            previousMonthChoice = monthComboBox.getSelectedIndex();
+            
+            
         }
+        int previousYearChoice;
         public void yearsComboBoxActionPerformed(ActionEvent event) {
             int month;
             int year;
+            if (monthComboBox.getSelectedIndex() < today.getMonth()) {
+                if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) 
+                {
+                    yearsComboBox.setSelectedIndex(previousYearChoice);
+                }
+            }
             month = monthComboBox.getSelectedIndex();
             year = Integer.parseInt(yearsComboBox.getSelectedItem().toString());
             cal = new BasicCalendar(month, year);
             for (int i = 0; i < 6; i++) {
                 for (int j = 0; j < 7; j++) 
                 {
-                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) > today.getYear()) 
-                    {
-                        dayButton[i][j].setEnabled(true);
-                    } 
                     if (cal.at(i, j) <= 0) 
                     {
                         dayButton[i][j].setText(null);
-                        dayButton[i][j].setEnabled(false);
-                    } 
-                    else {
-                        if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) > today.getYear()) 
-                        {
-                            dayButton[i][j].setEnabled(true);
-                        } 
-                        else
-                        {
-                            if ((monthComboBox.getSelectedIndex() + 1) > today.getMonth()) {
-                                dayButton[i][j].setEnabled(true);
-                            } 
-                            else if ((monthComboBox.getSelectedIndex() + 1) == today.getMonth()) 
-                            {
-                                if (cal.at(i, j) < today.getDayOfMonth()) 
-                                {
-                                    dayButton[i][j].setEnabled(false);
-                                }
-                            } 
-                            else 
-                            {
-                                dayButton[i][j].setEnabled(false);
-                            }
-                        }
+                    }
+                    else
+                    {
                         dayButton[i][j].setText(Integer.toString(cal.at(i, j)));
+                        dayButton[i][j].setForeground(Color.BLACK);
                     }
                 }
             }
-
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) 
+                    {
+                        if (monthComboBox.getSelectedIndex() == (today.getMonth())) {
+                            if (cal.at(i, j) < today.getDayOfMonth()) {
+                                dayButton[i][j].setForeground(Color.GRAY);
+                            }
+                        }
+                    }
+                }
+            }
+            previousYearChoice = yearsComboBox.getSelectedIndex();
         }
-        
         public void buttonArrayListener(ActionEvent event)
         {
             selectedDate.setDayOfMonth(dateSelected);
