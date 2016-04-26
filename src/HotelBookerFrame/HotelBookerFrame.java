@@ -9,7 +9,7 @@ import Calendar.BasicCalendar;
 import static java.awt.Color.BLUE;
 
 /**
- * * * @author Aleksandr Zayats
+ * * * @author Aleksandr Zayats, Son Tran
  */
 public class HotelBookerFrame extends JFrame {
 
@@ -19,8 +19,8 @@ public class HotelBookerFrame extends JFrame {
     private static final String enterString = "Enter Start and End Dates";
     DateAD today = new DateAD();
     DateAD selectedDate = new DateAD();
-    DateAD startDate1 = new DateAD();
-    DateAD endDate2 = new DateAD();
+    DateAD ostartDate = new DateAD();
+    DateAD oendDate = new DateAD(ostartDate.getTomorrow().toString());
     JButton[][] dayButton = new JButton[6][7];
     BasicCalendar cal = new BasicCalendar();
     classActionListener listener = new classActionListener();
@@ -186,6 +186,7 @@ public class HotelBookerFrame extends JFrame {
                     }
                 }
             }
+            
 
         }
         int previousMonthChoice = today.getMonth();
@@ -280,35 +281,111 @@ public class HotelBookerFrame extends JFrame {
             selectedDate.setDayOfMonth(dateSelected);
             selectedDate.setMonth((short) (monthComboBox.getSelectedIndex()));
             selectedDate.setYear((short)(Integer.parseInt(yearsComboBox.getSelectedItem().toString())));
+            
             //startDate.setActionCommand(selectedDate.toString());
             if (startDate.isSelected()) 
             {
-                dayLabel.setText(Short.toString(selectedDate.getDayOfMonth()));
-                startLabel.setText("Start Date: " + selectedDate.toString());
+                ostartDate = selectedDate.clone();
+                startRadioButtonListener(event);
+                dayLabel.setText(Short.toString(ostartDate.getDayOfMonth()));
+                startLabel.setText("Start Date: " + ostartDate.toString());
+                endLabel.setText("End Date: " + oendDate.toString());
             }
-            if (endDate.isSelected()) 
+            else 
             {
-                dayLabel.setText(Short.toString(selectedDate.getDayOfMonth()));
-                endLabel.setText("End Date: " + selectedDate.toString());
+                oendDate = selectedDate.clone();
+                endRadioButtonListener(event);
+                dayLabel.setText(Short.toString(oendDate.getDayOfMonth()));
+                startLabel.setText("Start Date: " + ostartDate.toString());
+                endLabel.setText("End Date: " + oendDate.toString());
             }
             
            
             
         }
-        public void startRadioButtonListner(ActionEvent event)
+        public void startRadioButtonListener(ActionEvent event)
         {
-            
-            
-            
-            
+            int month, year;
+            if (ostartDate.compareTo(oendDate) == -1) {
+
+            } else {
+                oendDate = ostartDate.getTomorrow();
+            }
+//            monthComboBox.setSelectedIndex(ostartDate.getMonth());
+//            yearsComboBox.setSelectedIndex(ostartDate.getYear() - today.getYear());
+//            month = monthComboBox.getSelectedIndex();
+//            year = Integer.parseInt(yearsComboBox.getSelectedItem().toString());
+//            cal = new BasicCalendar(month, year);
+//            for (int i = 0; i < 6; i++) {
+//                for (int j = 0; j < 7; j++) 
+//                {
+//                    if (cal.at(i, j) <= 0) 
+//                    {
+//                        dayButton[i][j].setText(null);
+//                    }
+//                    else
+//                    {
+//                        dayButton[i][j].setText(Integer.toString(cal.at(i, j)));
+//                        dayButton[i][j].setForeground(Color.BLACK);
+//                    }
+//                }
+//            }
+//            for (int i = 0; i < 6; i++) {
+//                for (int j = 0; j < 7; j++) 
+//                {
+//                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) 
+//                    {
+//                        if (monthComboBox.getSelectedIndex() == (today.getMonth())) {
+//                            if (cal.at(i, j) < today.getDayOfMonth()) {
+//                                dayButton[i][j].setForeground(Color.GRAY);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+
         }
         
-        public void endRadioButtonListner(ActionEvent event)
+        public void endRadioButtonListener(ActionEvent event)
         {
-            
-            
-            
-            
+            int month, year;
+            if (oendDate.compareTo(ostartDate) == 1) {
+
+            } else {
+                oendDate = ostartDate.getTomorrow();
+            }
+            monthComboBox.setSelectedIndex(ostartDate.getMonth());
+            yearsComboBox.setSelectedIndex(ostartDate.getYear() - today.getYear());
+//            month = monthComboBox.getSelectedIndex();
+//            year = Integer.parseInt(yearsComboBox.getSelectedItem().toString());
+//            cal = new BasicCalendar(month, year);
+//            for (int i = 0; i < 6; i++) {
+//                for (int j = 0; j < 7; j++) 
+//                {
+//                    if (cal.at(i, j) <= 0) 
+//                    {
+//                        dayButton[i][j].setText(null);
+//                    }
+//                    else
+//                    {
+//                        dayButton[i][j].setText(Integer.toString(cal.at(i, j)));
+//                        dayButton[i][j].setForeground(Color.BLACK);
+//                    }
+//                }
+//            }
+//            for (int i = 0; i < 6; i++) {
+//                for (int j = 0; j < 7; j++) 
+//                {
+//                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) 
+//                    {
+//                        if (monthComboBox.getSelectedIndex() == (today.getMonth())) {
+//                            if (cal.at(i, j) < today.getDayOfMonth()) {
+//                                dayButton[i][j].setForeground(Color.GRAY);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
