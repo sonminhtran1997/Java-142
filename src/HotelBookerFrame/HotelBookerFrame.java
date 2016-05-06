@@ -6,7 +6,11 @@ import javax.swing.*;
 import java.awt.event.*;
 import Calendar.DateAD;
 import Calendar.BasicCalendar;
+import javax.swing.JOptionPane;
 import static java.awt.Color.BLUE;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * * * @author Aleksandr Zayats, Son Tran
@@ -18,9 +22,10 @@ public class HotelBookerFrame extends JFrame {
     private static final int MAXIMUM_ROW_COUNTS = 10;
     private static final String enterString = "Enter Start and End Dates";
     DateAD today = new DateAD();
-    DateAD selectedDate = new DateAD();
+    DateAD selectedDate = today.clone();
     DateAD ostartDate = new DateAD();
     DateAD oendDate = new DateAD(ostartDate.getTomorrow().toString());
+    DateAD oldSelectedDate = new DateAD();
     JButton[][] dayButton = new JButton[6][7];
     BasicCalendar cal = new BasicCalendar();
     classActionListener listener = new classActionListener();
@@ -102,6 +107,15 @@ public class HotelBookerFrame extends JFrame {
                 buttonPanel.add(dayButton[i][j]);
             }
         }
+        for (int i = 0; i < 6; i++) 
+        {
+            for (int j = 0; j < 7; j++) {
+                if ((cal.at(i, j) == selectedDate.getDayOfMonth()))
+                    {
+                        dayButton[i][j].setForeground(Color.RED);
+                    }
+            }
+        }
     }
 
     public void setSouthPanel() {
@@ -122,11 +136,13 @@ public class HotelBookerFrame extends JFrame {
         currentDate.setFont(new Font("Arial", 1, 14));
         currentDate.setForeground(Color.RED);
         startDate = new JRadioButton();
+        startDate.addActionListener(listener);
         startLabel = new JLabel("Start Date: " + today.toString());
         startLabel.setFont(new Font("Arial", 1, 14));
         startLabel.setForeground(Color.BLUE);
         startDate.setSelected(true);
         endDate = new JRadioButton();
+        endDate.addActionListener(listener);
         endLabel = new JLabel("End Date: " + today.getTomorrow().toString());
         endLabel.setFont(new Font("Arial", 1, 14));
         endLabel.setForeground(Color.BLUE);
@@ -143,7 +159,8 @@ public class HotelBookerFrame extends JFrame {
         enter.setFont(new Font("Courier", 1, 14));
         enterField = new JTextField();
         enterField.setFont(new Font("Courier", Font.PLAIN, 14));
-        JButton bookJButton = new JButton("Book it!");
+        bookJButton = new JButton("Book it!");
+        bookJButton.addActionListener(listener);
 
         north.add(currentDate);
         middle1.add(startDate);
@@ -166,10 +183,18 @@ public class HotelBookerFrame extends JFrame {
         public void actionPerformed(ActionEvent event) {
             if (event.getSource() == monthComboBox) {
                 monthComboBoxActionPerformed(event);
-                
             }
             if (event.getSource() == yearsComboBox) {
                 yearsComboBoxActionPerformed(event);
+            }
+            if (event.getSource() == startDate) {
+                startRadioButtonListener(event);
+            }
+            if (event.getSource() == endDate) {
+                endRadioButtonListener(event);
+            }
+            if (event.getSource() == bookJButton) {
+                bookIt();
             }
             for (int i = 0; i < 6; i++) {
                 for (int j = 0; j < 7; j++) {
@@ -177,8 +202,14 @@ public class HotelBookerFrame extends JFrame {
                     {
                         try
                         {
-                            dateSelected = Short.parseShort(dayButton[i][j].getText());
-                            buttonArrayListener(event);
+                            if (cal.at(i, j) < today.getDayOfMonth() && 
+                                    Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear() && monthComboBox.getSelectedIndex() == today.getMonth()) {
+                                
+                            }
+                            else{
+                                dateSelected = Short.parseShort(dayButton[i][j].getText());
+                                buttonArrayListener(event);
+                            }
                         }
                         catch(NumberFormatException exception)
                         {}
@@ -194,13 +225,83 @@ public class HotelBookerFrame extends JFrame {
             int month;
             int year;
             if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) {
-                if ((monthComboBox.getSelectedIndex() + 1) <= today.getMonth()) 
+                if ((monthComboBox.getSelectedIndex()) + 1 <= today.getMonth()) 
                 {
                     monthComboBox.setSelectedIndex(previousMonthChoice);
                 }
             }
             month = monthComboBox.getSelectedIndex();
             year = Integer.parseInt(yearsComboBox.getSelectedItem().toString());
+            oldSelectedDate = selectedDate.clone();
+            selectedDate.setMonth((short)month);
+            selectedDate.setYear((short) year);
+            if (getTotalDays(oldSelectedDate.getMonth(), oldSelectedDate.getYear()) == 31  && oldSelectedDate.getDayOfMonth() == 31) {
+                if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 31) {
+                }
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 30)
+                {
+                    selectedDate.setDayOfMonth((short)30);
+                }
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 29)
+                {
+                    selectedDate.setDayOfMonth((short)29);
+                }
+                else
+                {
+                    selectedDate.setDayOfMonth((short)28);
+                }
+            }
+            else if(getTotalDays(oldSelectedDate.getMonth(), oldSelectedDate.getYear()) == 30 && oldSelectedDate.getDayOfMonth() == 30)
+            {
+                if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 31) 
+                {}
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 30)
+                {}
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 29)
+                {
+                    selectedDate.setDayOfMonth((short)29);
+                }
+                else
+                {
+                    selectedDate.setDayOfMonth((short)28);
+                }
+            }
+            else if(getTotalDays(oldSelectedDate.getMonth(), oldSelectedDate.getYear()) == 29 && oldSelectedDate.getDayOfMonth() == 29)
+            {
+                if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 31) 
+                {}
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 30)
+                {}
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 29)
+                {}
+                else
+                {
+                    selectedDate.setDayOfMonth((short)28);
+                }
+            }
+            else{}
+            dayLabel.setText(Short.toString(selectedDate.getDayOfMonth()));
+            if (startDate.isSelected()) {
+                ostartDate = selectedDate.clone();
+                if (ostartDate.compareTo(oendDate) == -1) {
+
+                } else {
+                    oendDate = ostartDate.getTomorrow();
+                }
+                startLabel.setText("Start Date: " + ostartDate.toString());
+                endLabel.setText("End Date: " + oendDate.toString());
+            }
+            else
+            {
+                oendDate = selectedDate.clone();
+                if (ostartDate.compareTo(oendDate) == -1) {
+
+                } else {
+                    oendDate = ostartDate.getTomorrow();
+                }
+                startLabel.setText("Start Date: " + ostartDate.toString());
+                endLabel.setText("End Date: " + oendDate.toString());
+            }
             cal = new BasicCalendar(month, year);
             
             for (int i = 0; i < 6; i++) {
@@ -227,6 +328,15 @@ public class HotelBookerFrame extends JFrame {
                                 dayButton[i][j].setForeground(Color.GRAY);
                             }
                         }
+                    }
+                }
+            }
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if ((cal.at(i, j) == selectedDate.getDayOfMonth()))
+                    {
+                        dayButton[i][j].setForeground(Color.RED);
                     }
                 }
             }
@@ -246,6 +356,77 @@ public class HotelBookerFrame extends JFrame {
             }
             month = monthComboBox.getSelectedIndex();
             year = Integer.parseInt(yearsComboBox.getSelectedItem().toString());
+            selectedDate.setMonth((short)month);
+            selectedDate.setYear((short) year);
+            if (getTotalDays(oldSelectedDate.getMonth(), oldSelectedDate.getYear()) == 31) {
+                if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 31) {
+                }
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 30)
+                {
+                    selectedDate.setDayOfMonth((short)30);
+                }
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 29)
+                {
+                    selectedDate.setDayOfMonth((short)29);
+                }
+                else
+                {
+                    selectedDate.setDayOfMonth((short)28);
+                }
+            }
+            else if(getTotalDays(oldSelectedDate.getMonth(), oldSelectedDate.getYear()) == 30)
+            {
+                if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 31) 
+                {}
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 30)
+                {}
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 29)
+                {
+                    selectedDate.setDayOfMonth((short)29);
+                }
+                else
+                {
+                    selectedDate.setDayOfMonth((short)28);
+                }
+            }
+            else if(getTotalDays(oldSelectedDate.getMonth(), oldSelectedDate.getYear()) == 29)
+            {
+                if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 31) 
+                {}
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 30)
+                {}
+                else if (getTotalDays(selectedDate.getMonth(), selectedDate.getYear()) == 29)
+                {}
+                else
+                {
+                    selectedDate.setDayOfMonth((short)28);
+                }
+            }
+            else{}
+            dayLabel.setText(Short.toString(selectedDate.getDayOfMonth()));
+            if (startDate.isSelected()) {
+                ostartDate = selectedDate.clone();
+                if (ostartDate.compareTo(oendDate) == -1) {
+
+                } else {
+                    oendDate = ostartDate.getTomorrow();
+                }
+                startLabel.setText("Start Date: " + ostartDate.toString());
+                endLabel.setText("End Date: " + oendDate.toString());
+            }
+            else
+            {
+                oendDate = selectedDate.clone();
+                if (ostartDate.compareTo(oendDate) == -1) {
+
+                } else {
+                    oendDate = ostartDate.getTomorrow();
+                }
+                startLabel.setText("Start Date: " + ostartDate.toString());
+                endLabel.setText("End Date: " + oendDate.toString());
+            }
+            month = monthComboBox.getSelectedIndex();
+            year = Integer.parseInt(yearsComboBox.getSelectedItem().toString());
             cal = new BasicCalendar(month, year);
             for (int i = 0; i < 6; i++) {
                 for (int j = 0; j < 7; j++) 
@@ -271,6 +452,15 @@ public class HotelBookerFrame extends JFrame {
                                 dayButton[i][j].setForeground(Color.GRAY);
                             }
                         }
+                    }
+                }
+            }
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if ((cal.at(i, j) == selectedDate.getDayOfMonth()))
+                    {
+                        dayButton[i][j].setForeground(Color.RED);
                     }
                 }
             }
@@ -311,38 +501,49 @@ public class HotelBookerFrame extends JFrame {
             } else {
                 oendDate = ostartDate.getTomorrow();
             }
-//            monthComboBox.setSelectedIndex(ostartDate.getMonth());
-//            yearsComboBox.setSelectedIndex(ostartDate.getYear() - today.getYear());
-//            month = monthComboBox.getSelectedIndex();
-//            year = Integer.parseInt(yearsComboBox.getSelectedItem().toString());
-//            cal = new BasicCalendar(month, year);
-//            for (int i = 0; i < 6; i++) {
-//                for (int j = 0; j < 7; j++) 
-//                {
-//                    if (cal.at(i, j) <= 0) 
-//                    {
-//                        dayButton[i][j].setText(null);
-//                    }
-//                    else
-//                    {
-//                        dayButton[i][j].setText(Integer.toString(cal.at(i, j)));
-//                        dayButton[i][j].setForeground(Color.BLACK);
-//                    }
-//                }
-//            }
-//            for (int i = 0; i < 6; i++) {
-//                for (int j = 0; j < 7; j++) 
-//                {
-//                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) 
-//                    {
-//                        if (monthComboBox.getSelectedIndex() == (today.getMonth())) {
-//                            if (cal.at(i, j) < today.getDayOfMonth()) {
-//                                dayButton[i][j].setForeground(Color.GRAY);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+            selectedDate = ostartDate.clone();
+            dayLabel.setText(Short.toString(ostartDate.getDayOfMonth()));
+            monthComboBox.setSelectedIndex(ostartDate.getMonth());
+            yearsComboBox.setSelectedItem(ostartDate.getYear());
+            month = monthComboBox.getSelectedIndex();
+            year = ostartDate.getYear();
+            cal = new BasicCalendar(month, year);
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if (cal.at(i, j) <= 0) 
+                    {
+                        dayButton[i][j].setText(null);
+                    }
+                    else
+                    {
+                        dayButton[i][j].setText(Integer.toString(cal.at(i, j)));
+                        dayButton[i][j].setForeground(Color.BLACK);
+                    }
+                }
+            }
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) 
+                    {
+                        if (monthComboBox.getSelectedIndex() == (today.getMonth())) {
+                            if (cal.at(i, j) < today.getDayOfMonth()) {
+                                dayButton[i][j].setForeground(Color.GRAY);
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if ((cal.at(i, j) == selectedDate.getDayOfMonth()))
+                    {
+                        dayButton[i][j].setForeground(Color.RED);
+                    }
+                }
+            }
 
         }
         
@@ -354,38 +555,169 @@ public class HotelBookerFrame extends JFrame {
             } else {
                 oendDate = ostartDate.getTomorrow();
             }
-            monthComboBox.setSelectedIndex(ostartDate.getMonth());
-            yearsComboBox.setSelectedIndex(ostartDate.getYear() - today.getYear());
-//            month = monthComboBox.getSelectedIndex();
-//            year = Integer.parseInt(yearsComboBox.getSelectedItem().toString());
-//            cal = new BasicCalendar(month, year);
-//            for (int i = 0; i < 6; i++) {
-//                for (int j = 0; j < 7; j++) 
-//                {
-//                    if (cal.at(i, j) <= 0) 
-//                    {
-//                        dayButton[i][j].setText(null);
-//                    }
-//                    else
-//                    {
-//                        dayButton[i][j].setText(Integer.toString(cal.at(i, j)));
-//                        dayButton[i][j].setForeground(Color.BLACK);
-//                    }
-//                }
-//            }
-//            for (int i = 0; i < 6; i++) {
-//                for (int j = 0; j < 7; j++) 
-//                {
-//                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) 
-//                    {
-//                        if (monthComboBox.getSelectedIndex() == (today.getMonth())) {
-//                            if (cal.at(i, j) < today.getDayOfMonth()) {
-//                                dayButton[i][j].setForeground(Color.GRAY);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+            selectedDate = oendDate.clone();
+            dayLabel.setText(Short.toString(oendDate.getDayOfMonth()));
+            monthComboBox.setSelectedIndex(oendDate.getMonth());
+            yearsComboBox.setSelectedItem(oendDate.getYear());
+            month = monthComboBox.getSelectedIndex();
+            year = oendDate.getYear();
+            cal = new BasicCalendar(month, year);
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if (cal.at(i, j) <= 0) 
+                    {
+                        dayButton[i][j].setText(null);
+                    }
+                    else
+                    {
+                        dayButton[i][j].setText(Integer.toString(cal.at(i, j)));
+                        dayButton[i][j].setForeground(Color.BLACK);
+                    }
+                }
+            }
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if (Integer.parseInt(yearsComboBox.getSelectedItem().toString()) == today.getYear()) 
+                    {
+                        if (monthComboBox.getSelectedIndex() == (today.getMonth())) {
+                            if (cal.at(i, j) < today.getDayOfMonth()) {
+                                dayButton[i][j].setForeground(Color.GRAY);
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < 6; i++) {
+                for (int j = 0; j < 7; j++) 
+                {
+                    if ((cal.at(i, j) == selectedDate.getDayOfMonth()))
+                    {
+                        dayButton[i][j].setForeground(Color.RED);
+                    }
+                }
+            }
+        }
+        public void bookIt(){
+            if (enterField.getText().equals("")) 
+            {
+                enterField.setText("Enter Name");
+                return;
+            }
+            if (enterField.getText().equals("Enter Name")) 
+                return;
+            if (isInteger(enterField.getText())) {
+                JOptionPane.showMessageDialog(null, "Enter a suitable name", "Error",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+            else {
+                try {
+                    PrintWriter fileOutput = new PrintWriter(new FileOutputStream("Bookings.txt", true));
+                    fileOutput.println(enterField.getText());
+                    fileOutput.println("Arrive: " + ostartDate);
+                    fileOutput.println("Depart: " + oendDate);
+                    fileOutput.println();
+                    fileOutput.close();
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, "Error Saving file", "Error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        }
+    }
+    public int getTotalDays(short month, short year) {
+        int totalDays = 0;
+        if (DateAD.isLeapYear(year)) {
+            switch (month) {
+                case 0:
+                    totalDays = 31;
+                    break;
+                case 1:
+                    totalDays = 29;
+                    break;
+                case 2:
+                    totalDays = 31;
+                    break;
+                case 3:
+                    totalDays = 30;
+                    break;
+                case 4:
+                    totalDays = 31;
+                    break;
+                case 5:
+                    totalDays = 30;
+                    break;
+                case 6:
+                    totalDays = 31;
+                    break;
+                case 7:
+                    totalDays = 31;
+                    break;
+                case 8:
+                    totalDays = 30;
+                    break;
+                case 9:
+                    totalDays = 31;
+                    break;
+                case 10:
+                    totalDays = 30;
+                    break;
+                case 11:
+                    totalDays = 31;
+                    break;
+            }
+        } else {
+            switch (month) {
+                case 0:
+                    totalDays = 31;
+                    break;
+                case 1:
+                    totalDays = 28;
+                    break;
+                case 2:
+                    totalDays = 31;
+                    break;
+                case 3:
+                    totalDays = 30;
+                    break;
+                case 4:
+                    totalDays = 31;
+                    break;
+                case 5:
+                    totalDays = 30;
+                    break;
+                case 6:
+                    totalDays = 31;
+                    break;
+                case 7:
+                    totalDays = 31;
+                    break;
+                case 8:
+                    totalDays = 30;
+                    break;
+                case 9:
+                    totalDays = 31;
+                    break;
+                case 10:
+                    totalDays = 30;
+                    break;
+                case 11:
+                    totalDays = 31;
+                    break;
+            }
+        }
+        return totalDays;
+    }
+    public boolean isInteger(String input){
+        try
+        {
+            Integer.parseInt(input);
+            return true;
+        }
+        catch(Exception e)
+        {
+            return false;
         }
     }
 
@@ -402,6 +734,7 @@ public class HotelBookerFrame extends JFrame {
     JTextField enterField;
     JRadioButton startDate;
     JRadioButton endDate;
+    JButton bookJButton;
     JComboBox monthComboBox;
     JComboBox yearsComboBox;
 }
